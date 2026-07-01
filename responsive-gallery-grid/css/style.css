@@ -11,13 +11,45 @@
     position: absolute;
     left:0;
     top:0;
-    background-size: 102% auto;
-    background-repeat: no-repeat;
-    background-position: 50% 50%; /* setting 50% can cause small 1px lines at the edges. 49%omg1337HAXORRZ-trick! */
-    background-color:#f4f4f4;
+    overflow: hidden; /* clip the inner <img> — e.g. when the zoom hover scales it past the tile */
+    background-color:#f4f4f4; /* placeholder behind the image while it loads */
     /*border:4px solid #ffffff;*/
     /*padding: 5px;*/
     box-sizing: content-box;
+}
+
+/* Every tile is a real <img> filling the anchor box (replaces the old JS-painted CSS
+   background-image and its 102%/cover background-size tricks). object-fit:cover crops to the
+   tile, covering the fixed aspect-ratio (.rgg-crop) case too. transform-origin centres the
+   zoom-hover scale (see Tile.zoom in main.js). */
+.rgg-imagegrid > .rgg-img > .rgg-tile-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform-origin: center center;
+}
+
+/* Per-image duotone (Gutenberg): filter the <img> directly so it is recolored while the caption
+   span (a sibling above it) stays un-recolored. */
+.rgg-imagegrid > .rgg-img.rgg-duotone > .rgg-tile-img {
+    filter: var(--rgg-duotone);
+}
+
+/* Native WP lightbox tiles carry no href, so the anchor keeps the default cursor; core only puts
+   cursor:zoom-in on the tile <img>. An overlay caption (a span covering the whole tile) sits above
+   the image and would otherwise inherit that default cursor, hiding the magnifier. Set zoom-in on
+   the whole lightbox tile so it shows over the caption too (cursor is inherited). */
+.rgg-imagegrid > .rgg-img.wp-lightbox-container {
+    cursor: zoom-in;
+}
+
+/* SimpleLightbox sets the caption's inline width to the exact image width; without
+   border-box its 10px padding would push it 20px wider than the image. */
+.sl-wrapper .sl-image .sl-caption {
+    box-sizing: border-box;
 }
 
 /* built-in captions styles and effects */

@@ -8,25 +8,28 @@ global $rgg_input_fields, $default_rgg_options;
 $rgg_input_fields = array();
 
 if (!defined('RGG_DEFAULT_TYPE')) { define('RGG_DEFAULT_TYPE', 'rgg'); };
-if (!defined('RGG_DEFAULT_CLASS')) { define('RGG_DEFAULT_CLASS', ''); };
-if (!defined('RGG_DEFAULT_REL')) { define('RGG_DEFAULT_REL', 'rgg'); };
 if (!defined('RGG_DEFAULT_IDS')) { define('RGG_DEFAULT_IDS', ''); };
 if (!defined('RGG_DEFAULT_MARGIN')) { define('RGG_DEFAULT_MARGIN', 2); };
 if (!defined('RGG_DEFAULT_SCALE')) { define('RGG_DEFAULT_SCALE', 1.1); };
 if (!defined('RGG_DEFAULT_MAXROWHEIGHT')) { define('RGG_DEFAULT_MAXROWHEIGHT', 200); };
-if (!defined('RGG_DEFAULT_ROWSPAN')) { define('RGG_DEFAULT_ROWSPAN', 0); };
 if (!defined('RGG_DEFAULT_INTIME')) { define('RGG_DEFAULT_INTIME', 100); };
 if (!defined('RGG_DEFAULT_OUTTIME')) { define('RGG_DEFAULT_OUTTIME', 100); };
 if (!defined('RGG_DEFAULT_CAPTIONS')) { define('RGG_DEFAULT_CAPTIONS', 'title'); };
-if (!defined('RGG_DEFAULT_LINKED_IMAGE_SIZE')) { define('RGG_DEFAULT_LINKED_IMAGE_SIZE', 'large'); };
+// 'full' to match the native engine's enlarged image (core opens the full original); the
+// file-based engines (simplelightbox / image-above) have no srcset, so they load it outright.
+if (!defined('RGG_DEFAULT_LINKED_IMAGE_SIZE')) { define('RGG_DEFAULT_LINKED_IMAGE_SIZE', 'full'); };
 if (!defined('RGG_DEFAULT_ORDERBY')) { define('RGG_DEFAULT_ORDERBY', 'menu_order'); };
 if (!defined('RGG_DEFAULT_LINK')) { define('RGG_DEFAULT_LINK', 'file'); };
+// What a click does in the block editor: the core/gallery "Link to" vocabulary
+// (none/media/attachment/lightbox), where 'lightbox' is core's "Enlarge on click". Seeds the
+// block's linkTo default (gutenberg.php -> editor.js) so new galleries open the WP lightbox.
+if (!defined('RGG_DEFAULT_LINK_TO')) { define('RGG_DEFAULT_LINK_TO', 'lightbox'); };
 if (!defined('RGG_DEFAULT_ID')) { define('RGG_DEFAULT_ID', ''); };
 if (!defined('RGG_DEFAULT_SIZE')) { define('RGG_DEFAULT_SIZE', 'medium'); };
 if (!defined('RGG_DEFAULT_INCLUDE')) { define('RGG_DEFAULT_INCLUDE', ''); };
 if (!defined('RGG_DEFAULT_EXCLUDE')) { define('RGG_DEFAULT_EXCLUDE', ''); };
 if (!defined('RGG_DEFAULT_ADMIN_LOCATION')) { define('RGG_DEFAULT_ADMIN_LOCATION', 'admin.php'); };
-if (!defined('RGG_DEFAULT_LIGHTBOX')) { define('RGG_DEFAULT_LIGHTBOX', 'disabled'); };
+if (!defined('RGG_DEFAULT_LIGHTBOX')) { define('RGG_DEFAULT_LIGHTBOX', 'native'); };
 if (!defined('RGG_DEFAULT_EFFECT')) { define('RGG_DEFAULT_EFFECT', 'bubble'); };
 
 // set RGG-pro options to RGG-free values
@@ -42,19 +45,17 @@ if (!is_array($rgg_options)) $rgg_options = array();
 
 $default_rgg_options = array(); //
 $default_rgg_options['type'] = RGG_DEFAULT_TYPE;
-$default_rgg_options['class'] = RGG_DEFAULT_CLASS;
-$default_rgg_options['rel'] = RGG_DEFAULT_REL;
 $default_rgg_options['ids'] = RGG_DEFAULT_IDS;
 $default_rgg_options['margin'] = RGG_DEFAULT_MARGIN;
 $default_rgg_options['scale'] = RGG_DEFAULT_SCALE;
 $default_rgg_options['maxrowheight'] = RGG_DEFAULT_MAXROWHEIGHT;
-$default_rgg_options['rowspan'] = RGG_DEFAULT_ROWSPAN;
 $default_rgg_options['intime'] = RGG_DEFAULT_INTIME;
 $default_rgg_options['outtime'] = RGG_DEFAULT_OUTTIME;
 $default_rgg_options['captions'] = RGG_DEFAULT_CAPTIONS;
 $default_rgg_options['linked_image_size'] = RGG_DEFAULT_LINKED_IMAGE_SIZE;
 $default_rgg_options['orderby'] = RGG_DEFAULT_ORDERBY;
 $default_rgg_options['link'] = RGG_DEFAULT_LINK;
+$default_rgg_options['link_to'] = RGG_DEFAULT_LINK_TO;
 $default_rgg_options['id'] = RGG_DEFAULT_ID;
 $default_rgg_options['size'] = RGG_DEFAULT_SIZE;
 $default_rgg_options['include'] = RGG_DEFAULT_INCLUDE;
@@ -176,9 +177,7 @@ function rgg_get_admin_form_structure($skip_submit = false) {
 			'before' => '<div class="title"><h3>Gallery Settings</h3><p>Default settings for each gallery. You can always overwrite these default options by modifying the <a href="https://responsive-gallery-grid.bdwm.be/shortcode-parameters" target="_blank">shortcode parameters</a>.</p></div>',
 			'fields' => array(
 				'type',
-				'class',
-				'rel',
-				'linked_image_size',
+				'link_to',
 				'lightbox',
 			),
 			'after' => $submit_button,
@@ -190,7 +189,6 @@ function rgg_get_admin_form_structure($skip_submit = false) {
 			'fields' => array(
 				'margin',
 				'maxrowheight',
-                'rowspan'
 			),
 			'after' => $submit_button,
 
@@ -211,27 +209,6 @@ function rgg_get_admin_form_structure($skip_submit = false) {
 		'captions' => array(
 			'before' => '<div class="title"><h3>Captions</h3></div>',
 			'fields' => array('captions'),
-			'after' => $submit_button,
-
-		),
-
-		'native-settings' => array(
-			'before' => '<div class="title"><h3>Native settings</h3><p>These relate to parameters that will work with the native gallery as well.</p></div>',
-			'fields' => array(
-				'orderby',
-				'link',
-				'size',
-				'ids',
-			),
-			'after' => $submit_button,
-		),
-		'advanced-native-settings' => array(
-			'before' => '<div class="title"><h3>Advanced native settings</h3><p>They are kind of useless in my opinion.</p></div>',
-			'fields' => array(
-				'include',
-				'exclude',
-				'id'
-			),
 			'after' => $submit_button,
 
 		),
@@ -439,13 +416,26 @@ function rgg_setup_input_fields() {
 		'default' => RGG_DEFAULT_ADMIN_LOCATION
 	);
 
+	$rgg_input_fields['link_to'] = array(
+		'input_type' => 'select',
+		'label' => 'On click',
+		'description' => 'What happens when a gallery image is clicked. "Enlarge on click" opens the lightbox (engine chosen below); the others link or do nothing.',
+		'options' => array(
+			'none'       => 'Nothing',
+			'media'      => 'Media File',
+			'attachment' => 'Attachment Page',
+			'lightbox'   => 'Enlarge on click',
+		),
+		'default' => RGG_DEFAULT_LINK_TO
+	);
+
 	$rgg_input_fields['lightbox'] = array(
 		'input_type' => 'select',
 		'label' => 'Lightbox',
 		'description' => 'Choose your lightbox configuration',
 		'options' => array(
-			'disabled' => 'Disabled / use third party lightbox',
-            'simplelightbox' => 'SimpleLightbox',
+			'simplelightbox' => 'SimpleLightbox',
+            'native' => 'WP default lightbox',
             'image-above' => 'Active image above gallery',
         ),
 		'default' => RGG_DEFAULT_LIGHTBOX
@@ -457,20 +447,6 @@ function rgg_setup_input_fields() {
 		'description' => 'The gallery type. Note: if you choose the native gallery all the other options will be ignored!',
 		'options' => array('rgg'=> 'Responsive Gallery Grid', 'native' => 'Native Gallery'),
 		'default' => RGG_DEFAULT_TYPE
-	);
-
-	$rgg_input_fields['class'] = array(
-		'input_type' => 'text',
-		'label' => 'Class',
-		'description' => 'Additional CSS class(es) that will be appended to the CSS class of the gallery container. If you wish to add multiple classes, seperate them with a space.',
-		'default' => RGG_DEFAULT_CLASS
-	);
-
-	$rgg_input_fields['rel'] = array(
-		'input_type' => 'text',
-		'label' => 'Rel',
-		'description' => 'The rel attribute of the image links. Used by lots of lightbox scripts to group images.',
-		'default' => RGG_DEFAULT_REL
 	);
 
 	$rgg_input_fields['margin'] = array(
@@ -492,12 +468,6 @@ function rgg_setup_input_fields() {
 		'label' => 'Max Row Height',
 		'description' => 'A positive integer value indicating the maximum height, in pixels, of each row in the Responsive Gallery Grid.',
 		'default' => RGG_DEFAULT_MAXROWHEIGHT
-	);
-	$rgg_input_fields['rowspan'] = array(
-		'input_type' => 'text',
-		'label' => 'Span some images over 2 rows',
-		'description' => 'Make some images larger',
-		'default' => RGG_DEFAULT_ROWSPAN
 	);
 
 	$rgg_input_fields['intime'] = array(
@@ -549,6 +519,9 @@ function rgg_setup_input_fields() {
 		'default' => RGG_DEFAULT_SIZE,
 	);
 
+	// Classic-shortcode-only (legacy): not placed on the settings screen or the block sidebar.
+	// Sets the WP image size opened by the file-based engines (simplelightbox / image-above) and
+	// plain file links; native core's lightbox has no equivalent and always opens the full original.
 	$rgg_input_fields['linked_image_size'] = array(
 		'input_type' => 'select',
 		'label' => 'Linked image size',
@@ -651,10 +624,6 @@ function rgg_options_sanitize($input) {
 
 	// Basic sanitization for all input fields
 	$input = array_map('sanitize_text_field', $input);
-
-	// Extra sanitization for attributes to prevent XSS
-	$input['class'] = sanitize_key($input['class']);
-	$input['rel'] = sanitize_key($input['rel']);
 
 	return $input;
 }

@@ -5,7 +5,7 @@ Plugin URI: https://responsive-gallery-grid.bdwm.be
 Description: Converts the default wordpress gallery to a Google+ styled image gallery grid, where the images are scaled to fill the gallery container, while maintaining image aspect ratio's.
 Author: Jules Colle, BDWM
 Author URI: http://bdwm.be
-Version: 2.3.18
+Version: 2.4
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License, version 2, as
@@ -30,7 +30,7 @@ if (!function_exists('rgg_gallery_shortcode')) {
     define('RGG_PLUGIN', 'rgg');
     define('RGG_OPTIONS', 'rgg_options');
 
-    define( 'RGG_VERSION', '2.3.18' );
+    define( 'RGG_VERSION', '2.4' );
     define( 'RGG_REQUIRED_WP_VERSION', '4.1' );
     define( 'RGG_PLUGIN_PATH', __FILE__ );
     define( 'RGG_PLUGIN_BASENAME', plugin_basename( RGG_PLUGIN_PATH ) );
@@ -47,6 +47,7 @@ if (!function_exists('rgg_gallery_shortcode')) {
 		require_once RGG_PLUGIN_DIR.'/pro/update.php';
 	}
     require_once RGG_PLUGIN_DIR.'/gallery-shortcode.php';
+    require_once RGG_PLUGIN_DIR.'/gutenberg.php';
 
 
     // register scripts and styles

@@ -1,0 +1,48 @@
+/*
+ * RGG grid preview in the block editor canvas. Two layers: this file flexbox-lays the tagged
+ * (.rgg-editor-grid) gallery as an approximate justified grid; js/editor.js (§6) then computes
+ * exact per-tile widths into a managed <style> that overrides the flex fallback below.
+ */
+
+/* Wrapping rows instead of core's columns/grid. The class may land on the gallery figure
+   or an outer wrapper, so match both. */
+.rgg-editor-grid.wp-block-gallery,
+.rgg-editor-grid .wp-block-gallery {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: var( --rgg-gap, 8px ) !important;
+	align-items: flex-start;
+}
+
+/* Each image is a flexible tile. The flex-grow/flex-basis is a fallback until editor.js
+   writes the exact width; --rgg-ar (the aspect ratio) keeps the tile's shape uncropped. */
+.rgg-editor-grid .wp-block-image {
+	flex-grow: var( --rgg-ar, 1.5 ) !important;
+	flex-basis: calc( var( --rgg-ar, 1.5 ) * var( --rgg-row-h, 220px ) ) !important;
+	width: auto !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	margin: 0 !important;
+	aspect-ratio: var( --rgg-ar, 1.5 );
+	overflow: hidden;
+}
+
+/* Fill the tile. object-fit: contain never crops, and fills exactly since the tile's
+   aspect-ratio matches the image. */
+.rgg-editor-grid .wp-block-image img {
+	display: block !important;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	object-fit: contain;
+	vertical-align: bottom;
+}
+
+/* Native "Aspect ratio" crop: the gallery forces every tile to one ratio (--rgg-ar set to the
+   fixed value in editor.js), so the image must cover the box rather than fit inside it. */
+.rgg-editor-grid.rgg-crop .wp-block-image img {
+	object-fit: cover;
+}
+
+/* Per-tile sizing (exact width, last-row alignment, "hide" dim) is injected by js/editor.js
+   into a managed <style>, keyed by data-rgg-lr / data-rgg-i. */

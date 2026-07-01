@@ -1,11 +1,11 @@
 === Responsive Gallery Grid ===
 Contributors: Jules Colle
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=j_colle%40hotmail%2ecom&lc=US&item_name=Jules%20Colle%20%2d%20WP%20plugins%20%2d%20Responsive%20Gallery%20Grid&item_number=rgg¤cy_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: responsive, responsive gallery, justified gallery, native gallery
+Tags: gallery, justified gallery, block
 Requires at least: 3.0
-Requires PHP: 5.2.4
-Tested up to: 6.7
-Stable tag: 2.3.18
+Requires PHP: 8.0
+Tested up to: 7.0
+Stable tag: 2.4
 License: GPLv2 or later
 
 
@@ -14,7 +14,8 @@ Transforms the native WordPress gallery to a responsive gallery, respecting imag
 
 == Description ==
 
-Transforms the native WordPress gallery to a responsive gallery, respecting image proportions. Includes SimpleLightbox, but also compatible with most third party lightbox plugins.
+This plugin transforms the native Wordpress gallery into a gallery that organizes your images into horizontal rows of the same height while preserving the original aspect ratio of each photo, preventing unwanted cropping and perfectly filling the gallery container.
+Works with both the classic gallery shortcode and the new Block Editor (Gutenberg) gallery block.
 
 <a href="https://responsive-gallery-grid.bdwm.be/demo/">View Demo</a>
 <a href="https://responsive-gallery-grid.bdwm.be/shortcode-parameters/">Documentation</a>
@@ -70,6 +71,13 @@ Sure. Please start a support thread for any of your requests.
 4. You can pimp eacht individual gallery to your needs by updating the gallery shortcode paramaters. (Check out the documentation)
 
 == Changelog ==
+
+= 2.4 (2026-06-30) =
+* Add support for the Block Editor (Gutenberg) and the new gallery block. The plugin now automatically replaces the default gallery block with a responsive gallery grid.
+* Add a "WP default lightbox" option that uses WordPress core's built-in lightbox (now the default). SimpleLightbox and the "active image above gallery" mode are still available.
+* Render gallery tiles as real <img> elements instead of CSS background images, for better accessibility, SEO and lazy-loading.
+* Streamline the gallery settings (clearer "On click" and lightbox options).
+* Tested with WP version 7.0
 
 = 2.3.18 (2024-11-22) =
 * fixed bug that locked out non-admin users and caused conflicts with ajax requests

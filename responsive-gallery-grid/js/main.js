@@ -57,8 +57,33 @@ jQuery(document).ready(function($) {
 
     function pre_init() {
 
-        if (typeof $('.rgg-simplelightbox').simpleLightbox === 'function') {
-            $('.rgg-simplelightbox').simpleLightbox({captionSelector: 'self'});
+        var $simplelightbox = $('.rgg-simplelightbox');
+
+        // Only initialise when tiles actually opt into the lightbox; SimpleLightbox throws on
+        // an empty set (e.g. a gallery whose images all link to a page instead of the file),
+        // and that uncaught error would abort the grid layout below.
+        if ($simplelightbox.length && typeof $simplelightbox.simpleLightbox === 'function') {
+            // Initialise one SimpleLightbox instance per grid so next/prev stays within a
+            // single gallery. SimpleLightbox groups whatever set it's called on; a page-wide
+            // call would merge every gallery's tiles into one navigation sequence.
+            // Read the caption from data-caption (rendered HTML) rather than the title
+            // attribute, which only holds the stripped plain-text browser tooltip.
+            $('.rgg-imagegrid').each(function() {
+                var $tiles = $('.rgg-simplelightbox', this);
+                if ($tiles.length) {
+                    $tiles.simpleLightbox({captionSelector: 'self', captionType: 'data', captionsData: 'caption'});
+                }
+            });
+
+            // Mirror the active tile's duotone (Gutenberg per-image filter) onto the lightbox
+            // <img>, which is built from data-src without it; empty value clears it. Applied in
+            // a microtask because 'show' fires just before the <img> exists, but before paint.
+            $simplelightbox.on('show.simplelightbox changed.simplelightbox', function() {
+                var duotone = this.style.getPropertyValue('--rgg-duotone');
+                Promise.resolve().then(function() {
+                    $('.sl-image img').css('filter', duotone || '');
+                });
+            });
         }
 
         // add click events for image-above images (slick)
@@ -112,7 +137,6 @@ jQuery(document).ready(function($) {
 
             $grid = $(this);
             par = rgg_params[$grid.data('rgg-id')];
-            par.scale_percent = par.scale*100;
             init_grid($grid,par);
 
         });
@@ -136,8 +160,8 @@ jQuery(document).ready(function($) {
 
             $img = $(this);
 
-            $img.css('background-image',"url('"+$img.data('src')+"')");
-
+            // Every tile carries a real <img class="rgg-tile-img"> child that fills it (style.css);
+            // the layout below only sizes/positions the anchor, the image follows via CSS.
             var tile = new Tile($img,par);
 
             tile.top = top;
@@ -217,6 +241,7 @@ jQuery(document).ready(function($) {
 
 function Tile($img, par) {
     this.$img = $img;
+    this.$tileImg = $img.children('img.rgg-tile-img').eq(0); // the real <img> filling the tile (zoom scales it)
     this.$caption = jQuery('.rgg-caption-container',$img).eq(0);
     this.par = par;
 
@@ -287,7 +312,11 @@ Tile.prototype.animate_tile_in = function(css) {
                 tile.animate_in_done();
             },
             start: function() {
-                tile.$img.css({'box-shadow' : '0 1px 3px rgba(0,0,0,.5)'});
+                // Drop-shadow only reads as a lift when the tile actually grows out of the grid,
+                // i.e. the bubble effect scaling past 1. Other effects (and scale<=1) leave it off.
+                if (tile.par.effect === 'bubble' && tile.par.scale > 1) {
+                    tile.$img.css({'box-shadow' : '0 1px 3px rgba(0,0,0,.5)'});
+                }
                 tile.animate_in_start();
             },
             progress: function(animation, progress) {
@@ -430,11 +459,16 @@ Tile.prototype.unfade = function() {
     this.animate_tile_out({'opacity': 1});
 };
 
+// Tiles are now real <img>, not CSS backgrounds, so the zoom can't animate background-size.
+// Instead transition the inner <img>'s transform (clipped by the anchor's overflow:hidden) and
+// run an empty animate_tile_in/out for the shared box-shadow / z-index / caption lifecycle.
 Tile.prototype.zoom = function() {
-    this.animate_tile_in({'background-size': this.par.scale_percent+'%'});
+    this.$tileImg.css({'transition': 'transform '+parseInt(this.par.intime)+'ms', 'transform': 'scale('+this.par.scale+')'});
+    this.animate_tile_in({});
 };
 Tile.prototype.unzoom = function() {
-    this.animate_tile_out({'background-size': '102%'});
+    this.$tileImg.css({'transition': 'transform '+parseInt(this.par.outtime)+'ms', 'transform': ''});
+    this.animate_tile_out({});
 };
 
 var overlay_animation = {
