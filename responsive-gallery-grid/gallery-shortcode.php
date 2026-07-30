@@ -182,6 +182,8 @@ function rgg_render_gallery($attr, $instance, $caption_overrides = array(), $con
     } elseif (!empty($include)) {
         $_attachments = get_posts(array('include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
 
+        // Result can only be a subset of the requested ids, unlike the RML branch (folder query).
+        $ids_scoped_query = true;
         $attachments = array();
         foreach ($_attachments as $key => $val) {
             $attachments[$val->ID] = $_attachments[$key];
@@ -217,6 +219,11 @@ function rgg_render_gallery($attr, $instance, $caption_overrides = array(), $con
             if ($mid && isset($attachments[$mid])) {
                 $render_ids[] = $mid;
             }
+        }
+        // Fewer render ids than attachments means the query was remapped: WPML swaps attachment
+        // ids for their translations, so none of the requested ids match. Render what came back.
+        if (!empty($ids_scoped_query) && count($render_ids) < count($attachments)) {
+            $render_ids = array_keys($attachments);
         }
     } else {
         $render_ids = array_keys($attachments);

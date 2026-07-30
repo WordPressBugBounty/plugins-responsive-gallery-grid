@@ -5,7 +5,7 @@ Tags: gallery, justified gallery, block
 Requires at least: 3.0
 Requires PHP: 8.0
 Tested up to: 7.0
-Stable tag: 2.4
+Stable tag: 2.4.1
 License: GPLv2 or later
 
 
@@ -59,18 +59,17 @@ Need anything else? Please start a support thread?
 
 Sure. Please start a support thread for any of your requests.
 
-== Upgrade Notice ==
-
-1. RGG now uses native gallery features to retrieve the images, this means you can no longer add multiple instances of the same image to a single gallery. If you need this feature, please revert to version 1.3.
-
 == Screenshots ==
 
 1. Responsive Gallery Grid in action. By default the images will pop out on mouse-over.
 2. The gallery shortcode can be extended with some options, from the text editor.
 3. From the WYSIWYG view the gallery looks like an ordinary Wordpress gallery, so you can easily add and remove pictures the way you are used to.
-4. You can pimp eacht individual gallery to your needs by updating the gallery shortcode paramaters. (Check out the documentation)
+4. You can pimp each individual gallery to your needs by updating the gallery shortcode parameters. (Check out the documentation)
 
 == Changelog ==
+
+= 2.4.1 (2026-07-30) =
+* Fix empty galleries on WPML translated pages: render the images the query returns, even when another plugin remaps the attachment IDs.
 
 = 2.4 (2026-06-30) =
 * Add support for the Block Editor (Gutenberg) and the new gallery block. The plugin now automatically replaces the default gallery block with a responsive gallery grid.
