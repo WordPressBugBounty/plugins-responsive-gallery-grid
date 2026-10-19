@@ -43,7 +43,7 @@ jQuery(document).ready(function($) {
 
     pre_init(); // called only once per page
 
-    jQuery(window).resize(function(){
+    jQuery(window).on('resize', function(){
         clearTimeout(timeout);
         timeout = setTimeout(function(){
 
@@ -68,10 +68,19 @@ jQuery(document).ready(function($) {
             // call would merge every gallery's tiles into one navigation sequence.
             // Read the caption from data-caption (rendered HTML) rather than the title
             // attribute, which only holds the stripped plain-text browser tooltip.
+            // A grid with captions below its images shows them below the lightbox image too
+            // ('outside'), with the image capped at 80% of the viewport height (default 90%) to
+            // leave room for the caption underneath.
             $('.rgg-imagegrid').each(function() {
                 var $tiles = $('.rgg-simplelightbox', this);
                 if ($tiles.length) {
-                    $tiles.simpleLightbox({captionSelector: 'self', captionType: 'data', captionsData: 'caption'});
+                    var options = {captionSelector: 'self', captionType: 'data', captionsData: 'caption'};
+                    var par = rgg_params[$(this).data('rgg-id')];
+                    if (rgg_is_pro && par && par.captions === 'below') {
+                        options.captionPosition = 'outside';
+                        options.heightRatio = 0.8;
+                    }
+                    $tiles.simpleLightbox(options);
                 }
             });
 
@@ -87,7 +96,7 @@ jQuery(document).ready(function($) {
         }
 
         // add click events for image-above images (slick)
-        $('.rgg-image-above').click(function() {
+        $('.rgg-image-above').on('click', function() {
 
             $grid = $(this).closest('.rgg-imagegrid').eq(0);
 
@@ -462,12 +471,16 @@ Tile.prototype.unfade = function() {
 // Tiles are now real <img>, not CSS backgrounds, so the zoom can't animate background-size.
 // Instead transition the inner <img>'s transform (clipped by the anchor's overflow:hidden) and
 // run an empty animate_tile_in/out for the shared box-shadow / z-index / caption lifecycle.
+// The scale is mirrored in --rgg-zoom, transitioned in lockstep, for layouts where the anchor
+// can't clip (captions below the image): style.css derives the <img>'s own clip-path from it.
 Tile.prototype.zoom = function() {
-    this.$tileImg.css({'transition': 'transform '+parseInt(this.par.intime)+'ms', 'transform': 'scale('+this.par.scale+')'});
+    var duration = parseInt(this.par.intime)+'ms';
+    this.$tileImg.css({'transition': 'transform '+duration+', --rgg-zoom '+duration, 'transform': 'scale('+this.par.scale+')', '--rgg-zoom': this.par.scale});
     this.animate_tile_in({});
 };
 Tile.prototype.unzoom = function() {
-    this.$tileImg.css({'transition': 'transform '+parseInt(this.par.outtime)+'ms', 'transform': ''});
+    var duration = parseInt(this.par.outtime)+'ms';
+    this.$tileImg.css({'transition': 'transform '+duration+', --rgg-zoom '+duration, 'transform': '', '--rgg-zoom': ''});
     this.animate_tile_out({});
 };
 
@@ -492,7 +505,12 @@ Tile.prototype.init_captions_params = function() {
     this.is_caption_hide_on_hover = (cap == 'overlay-hover-hide');
     this.is_caption_show_on_hover = (cap == 'overlay-hover-show');
     this.is_caption_show_always = (cap == 'overlay');
-    this.is_caption_hide_always = (cap == 'off' || cap == 'title' || cap == 'custom');
+    this.is_caption_hide_always = (cap == 'off' || cap == 'title');
+    // Custom and below captions are styled by the stylesheet alone: no inline position/opacity
+    // and no hover animation, since inline styles would override the (theme's) CSS.
+    this.is_caption_css_only = (cap == 'custom' || cap == 'below');
+
+    if (this.is_caption_css_only) return;
 
     var fx = this.par.captions_effect;
 
@@ -534,11 +552,11 @@ Tile.prototype.init_captions_params = function() {
 }
 
 Tile.prototype.animate_caption_in = function() {
-    if (this.is_caption_hide_always || this.is_caption_show_always) return;
+    if (this.is_caption_hide_always || this.is_caption_show_always || this.is_caption_css_only) return;
     this.$caption.css(this.caption_to_css);
 }
 
 Tile.prototype.animate_caption_out = function() {
-    if (this.is_caption_hide_always || this.is_caption_show_always) return;
+    if (this.is_caption_hide_always || this.is_caption_show_always || this.is_caption_css_only) return;
     this.$caption.css(this.caption_from_css);
 }

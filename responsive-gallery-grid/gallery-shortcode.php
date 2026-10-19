@@ -445,7 +445,8 @@ function rgg_render_gallery($attr, $instance, $caption_overrides = array(), $con
             <a <?php echo $href_attr ?> <?php echo $a_title ?><?php echo $lb_attr ?> class="<?php echo $rgg_lightbox ?> size-<?php echo $size ?> rgg-img<?php echo $duotone_class ?><?php echo $lb_class ?>" data-ratio="<?php echo $tile_ratio ?>"<?php echo $duotone_style ?>>
                 <?php
                 echo $tile_img;
-                if (RGG_IS_PRO && ((substr($captions, 0, 7) == 'overlay' || $captions == 'custom') && !empty($caption_esc))) {
+                // Below captions always get their (possibly empty) bar, so every tile's strip looks the same.
+                if (RGG_IS_PRO && (((substr($captions, 0, 7) == 'overlay' || $captions == 'custom') && !empty($caption_esc)) || $captions == 'below')) {
                     echo '<span class="rgg-caption-container"><span class="rgg-caption"><span class="rgg-inner-caption">' . $title . '</span></span></span>';
                 }
                 ?>

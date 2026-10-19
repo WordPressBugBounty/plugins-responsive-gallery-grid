@@ -52,6 +52,16 @@
     box-sizing: border-box;
 }
 
+/* Caption below the lightbox image (galleries with captions below their images, see main.js):
+   opaque like the grid's caption bar, since it sits on the light overlay instead of the image.
+   main.js caps the image at 80% of the viewport height, centred, so at least 10vh is left below
+   it; a caption longer than that scrolls instead of running off the screen. */
+.sl-wrapper .sl-image .sl-caption.pos-outside {
+    background-color: #333;
+    max-height: 10vh;
+    overflow-y: auto;
+}
+
 /* built-in captions styles and effects */
 
 .rgg-caption-container {
@@ -77,6 +87,69 @@
     color: #eeeeee;
     font-weight:bold;
     padding: 10px;
+}
+
+/* Captions below the image (Pro). The caption strip is the tile's bottom border: main.js adds a
+   tile's border height to the row spacing, so every row gets room for its captions without
+   overlapping the next row.
+   The strip fits --rgg-caption-lines lines of caption (default 1); a longer caption is cut off
+   with an ellipsis. It's read with a fallback rather than declared here, so it can be set on the
+   grid or any ancestor, e.g. body { --rgg-caption-lines: 3; }. The strip height follows from it:
+   lines x 18px line height + 2 x 9px padding (36px for one line). */
+.rgg-imagegrid.captions-below {
+    --rgg-caption-height: calc(var(--rgg-caption-lines, 1) * 18px + 18px);
+}
+
+/* overflow: the caption sits outside the image box. !important because jQuery's animate() sets an
+   inline overflow:hidden while the bubble effect animates the tile's size, which would hide the
+   caption for the length of the animation. */
+.rgg-imagegrid.captions-below > .rgg-img {
+    overflow: visible !important;
+    border-bottom: var(--rgg-caption-height) solid transparent;
+    background-clip: padding-box; /* keep the loading placeholder out of the caption strip */
+}
+
+/* The anchor no longer clips, so the zoom effect clips the <img> itself. clip-path is applied
+   before the scale, so inset by (1 - 1/scale)/2 per side to keep the visible area at the tile
+   size. --rgg-zoom is set and transitioned together with the transform (see Tile.zoom). */
+@property --rgg-zoom {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 1;
+}
+
+.rgg-imagegrid.captions-below > .rgg-img > .rgg-tile-img {
+    clip-path: inset(calc((1 - 1 / var(--rgg-zoom)) * 50%));
+}
+
+.rgg-imagegrid.captions-below .rgg-caption-container {
+    top: 100%;
+    height: var(--rgg-caption-height);
+}
+
+/* Same look as the overlay caption (text colour and font come from the base rule above), as a
+   bar filling the strip, with the text centred in it. The background is opaque: there's no image
+   behind it, and it matches the overlay's rgba(0,0,0,.8) on a white page. The explicit height
+   keeps the bar for an empty caption. */
+.rgg-imagegrid.captions-below .rgg-caption-container .rgg-caption {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background-color: #333;
+    line-height: 18px;
+    padding: 9px 10px;
+}
+
+/* overflow: hidden also lets this flex item shrink below a long word's width, so break-word can
+   wrap it instead of it running out of the bar. */
+.rgg-imagegrid.captions-below .rgg-inner-caption {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--rgg-caption-lines, 1);
+    overflow: hidden;
+    overflow-wrap: break-word;
 }
 
 

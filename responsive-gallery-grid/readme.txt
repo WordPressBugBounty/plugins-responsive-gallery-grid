@@ -3,9 +3,9 @@ Contributors: Jules Colle
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=j_colle%40hotmail%2ecom&lc=US&item_name=Jules%20Colle%20%2d%20WP%20plugins%20%2d%20Responsive%20Gallery%20Grid&item_number=rgg¤cy_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Tags: gallery, justified gallery, block
 Requires at least: 3.0
-Requires PHP: 8.0
-Tested up to: 7.0
-Stable tag: 2.4.1
+Requires PHP: 7.4
+Tested up to: 7.1
+Stable tag: 2.4.2
 License: GPLv2 or later
 
 
@@ -67,6 +67,10 @@ Sure. Please start a support thread for any of your requests.
 4. You can pimp each individual gallery to your needs by updating the gallery shortcode parameters. (Check out the documentation)
 
 == Changelog ==
+
+= 2.4.2 (2026-10-19) =
+* PRO: New "Below the image" captions option, also shown below the image in SimpleLightbox. Set the number of caption lines with the --rgg-caption-lines CSS variable.
+* PRO: Fix "Custom style" captions not showing. (https://responsive-gallery-grid.bdwm.be/rgg-pro-custom-caption-styles/)
 
 = 2.4.1 (2026-07-30) =
 * Fix empty galleries on WPML translated pages: render the images the query returns, even when another plugin remaps the attachment IDs.
